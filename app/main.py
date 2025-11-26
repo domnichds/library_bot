@@ -11,7 +11,7 @@ bot = Bot(
     token=BOT_TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
-dp = Dispatcher(bot=bot)
+dp = Dispatcher()
 
 def main_menu_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
@@ -31,10 +31,8 @@ async def main():
     try:
         print("Bot started. Press ctrl + c to shutdown")
         await dp.start_polling(bot)
-    except e:
+    except Exception as e:
         print(f"An error occurred: {e}")
-    finally:
-        await dp.shutdown()
 
 if __name__ == "__main__":
     asyncio.run(main())
