@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.db import Base
+from .db import Base
 
 class Genre(Base):
     __tablename__ = "genres"

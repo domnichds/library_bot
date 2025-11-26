@@ -7,6 +7,8 @@ from aiogram.enums import ParseMode
 
 from config import BOT_TOKEN
 from texts import *
+from models.db import init_db
+
 bot = Bot(
     token=BOT_TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)
@@ -29,10 +31,11 @@ async def command_start(message: Message):
 
 async def main():
     try:
-        print("Bot started. Press ctrl + c to shutdown")
+        print("Бот запущен. Нажмите ctrl + c для остановки")
+        await init_db()
         await dp.start_polling(bot)
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Ошибка: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
