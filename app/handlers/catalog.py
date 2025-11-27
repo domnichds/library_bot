@@ -27,16 +27,18 @@ async def catalog_entery(message: Message):
     )
 
 # callback реагирует на выбор жанра
-@router.callback_query(F.data.startswith("genre:"))
+@router.callback_query(F.data.regexp("^genre:\d+:page:\d+$"))
 async def on_genre_chosen(callback: CallbackQuery):
     try:
-        genre_id = int(callback.data.split(":")[1])
+        parts = callback.data.split(":")
+        genre_id = int(parts[1])
+        page_id = int(parts[3])
     except (ValueError, IndexError) as e:
         await callback.answer("Ошибка выбора жанра")
         return
     
-    # Получаем книги для выбранного жанра, первую страницу
-    books, total_pages = await get_books_page_by_genre(genre_id, 1)
+    # Получаем книги для выбранного жанра и страницы
+    books, total_pages = await get_books_page_by_genre(genre_id, page_id)
 
     if not books:
         await callback.message.edit_text(CATALOG_NO_BOOKS)
@@ -45,7 +47,7 @@ async def on_genre_chosen(callback: CallbackQuery):
 
     await callback.message.edit_text(
         CATALOG_CURRENT_GENRE,
-        reply_markup=books_keyboard(books, genre_id, 1, total_pages)
+        reply_markup=books_keyboard(books, genre_id, page_id, total_pages)
     )
     await callback.answer()
 
@@ -65,4 +67,3 @@ async def on_back_to_genres(callback: CallbackQuery):
         reply_markup=genres_keyboard(genres)
     )
     await callback.answer()
-
