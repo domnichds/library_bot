@@ -6,3 +6,4 @@ START_MESSAGE = (
 CATALOG_CHOOSE_GENRE = "Выберите жанр из списка:"
 CATALOG_NO_GENRES = "Жанров пока нет."
 CATALOG_NO_BOOKS = "В этом жанре пока нет книг."
+CATALOG_CURRENT_GENRE = "Книги в выбраном жанре:"

@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from app.models.book import Genre, Book
+from ..models.book import Genre, Book
 
 
 def genres_keyboard(genres: list[Genre]) -> InlineKeyboardMarkup:

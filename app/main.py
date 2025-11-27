@@ -5,15 +5,18 @@ from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from config import BOT_TOKEN
-from texts import *
-from models.db import init_db
+from .config import BOT_TOKEN
+from .texts import *
+from .models.db import init_db
+
+from .handlers import catalog as catalog_handler
 
 bot = Bot(
     token=BOT_TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
 dp = Dispatcher()
+dp.include_router(catalog_handler.router)
 
 def main_menu_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
