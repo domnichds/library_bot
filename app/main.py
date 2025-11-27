@@ -5,6 +5,8 @@ from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
+from app.services.file_sync import sync_book_from_fs
+
 from .config import BOT_TOKEN
 from .texts import *
 from .models.db import init_db
@@ -33,6 +35,7 @@ async def command_start(message: Message):
     )
 
 async def main():
+    await sync_book_from_fs()
     try:
         print("Бот запущен. Нажмите ctrl + c для остановки")
         await init_db()
