@@ -32,7 +32,7 @@ def books_keyboard(
             [
                 InlineKeyboardButton(
                     text=f"{book.title} — {book.author}",
-                    callback_data=f"book:{book.id}"
+                    callback_data=f"book:{book.id}:genre:{genre_id}:page:{page}"
                 )
             ]
         )
