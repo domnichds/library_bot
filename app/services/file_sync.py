@@ -11,6 +11,9 @@ from app.models.book import Genre, Book, BookFile
 
 @dataclass
 class BookData:
+    """
+    Простая структура для данных о книге, извлечённых из пути к файлу.
+    """
     genre: str
     title: str
     author: str
@@ -19,16 +22,21 @@ class BookData:
 
 def parse_file_path(file_path: Path) -> BookData:
     """
-    Получаем информацию о книге по файлу
+    Получаем информацию о книге по пути к файлу.
 
-    Для пути вида /fantasy/Hobbit - Tolkien.fb2
+    Ожидаемая структура пути относительно BOOKS_DIR_STORAGE:
+        /<genre_slug>/<Название> - <Автор>.<расширение>
 
-    Получаем BookData(
-        genre = fantasy,
-        title = Hobbit,
-        author = Tolkien,
-        format = fb2
-    )
+    Например:
+        /fantasy/Hobbit - Tolkien.fb2
+
+    Вернёт:
+        BookData(
+            genre='fantasy',
+            title='Hobbit',
+            author='Tolkien',
+            format='fb2',
+        )
     """
     rel_path = file_path.relative_to(BOOKS_DIR_STORAGE)
     path = rel_path.parts
@@ -63,7 +71,12 @@ def parse_file_path(file_path: Path) -> BookData:
 
 
 async def get_or_create_genre(session: AsyncSession, genre_slug: str) -> Genre:
-    # Получаем или создаем новый жанр по его слагу
+    """
+    Получаем или создаём жанр по его slug'у.
+
+    В БД жанр хранится человекочитаемым именем (например, "Фэнтези"),
+    а slug (например, "fantasy") маппится через GENRE_MAP.
+    """
     display_name = GENRE_MAP.get(genre_slug, genre_slug)
 
     result = await session.execute(
@@ -85,7 +98,14 @@ async def get_or_create_book(
     genre: Genre,
     book_data: BookData,
 ) -> Book:
-    # Получаем или создаем новую книгу по жанру, названию и автору
+    """
+    Получаем или создаём книгу в рамках конкретного жанра.
+
+    Книга считается той же самой, если совпадают:
+      - genre_id,
+      - title,
+      - author.
+    """
     result = await session.execute(
         select(Book).where(
             Book.genre_id == genre.id,
@@ -113,7 +133,15 @@ async def get_or_create_book_file(
     format_: str,
     rel_path: str,
 ) -> BookFile:
-    # Получаем или создаем новый файл книги по книге, формату и относительному пути
+    """
+    Получаем или создаём файловый вариант книги (конкретный формат и путь).
+
+    Условие уникальности:
+      - одна запись BookFile на пару (book_id, format_).
+
+    Если запись уже есть, просто обновляем путь (на случай, если файл
+    был перемещён в файловой системе).
+    """
     result = await session.execute(
         select(BookFile).where(
             BookFile.book_id == book.id,
@@ -137,6 +165,17 @@ async def get_or_create_book_file(
 
 
 async def sync_book_from_fs() -> None:
+    """
+    Обойти локальный каталог BOOKS_DIR_STORAGE и синхронизировать содержимое с БД.
+
+    Алгоритм:
+      - рекурсивно ищем все файлы в BOOKS_DIR_STORAGE;
+      - для каждого файла:
+          * парсим путь в BookData;
+          * находим/создаём Genre;
+          * находим/создаём Book;
+          * находим/создаём BookFile (формат + относительный путь).
+    """
     if not BOOKS_DIR_STORAGE.exists():
         raise ValueError(f"Директория {BOOKS_DIR_STORAGE} не существует")
 

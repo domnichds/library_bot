@@ -21,6 +21,12 @@ router = Router()
 
 @router.message(F.text == "📚Каталог")
 async def catalog_entery(message: Message):
+    """
+    Обработчик команды/кнопки «📚Каталог».
+
+    Загружает список жанров из БД и показывает пользователю
+    клавиатуру с жанрами. Если жанров нет, выводит соответствующее сообщение.
+    """
     genres = await get_all_genres()
 
     if not genres:
@@ -32,9 +38,17 @@ async def catalog_entery(message: Message):
         reply_markup=genres_keyboard(genres)
     )
 
-# callback реагирует на выбор жанра
 @router.callback_query(F.data.regexp("^genre:\d+:page:\d+$"))
 async def on_genre_chosen(callback: CallbackQuery):
+    """
+    Обработчик выбора жанра или переключения страниц списка книг.
+
+    Ожидаемый формат callback_data:
+        "genre:{genre_id}:page:{page}"
+
+    Показывает пользователю список книг выбранного жанра
+    с учётом пагинации.
+    """
     try:
         parts = callback.data.split(":")
         genre_id = int(parts[1])
@@ -57,9 +71,14 @@ async def on_genre_chosen(callback: CallbackQuery):
     )
     await callback.answer()
 
-# callback реагирует на возврат к списку жанров
 @router.callback_query(F.data == "back:genres")
 async def on_back_to_genres(callback: CallbackQuery):
+    """
+    Обработчик кнопки «Назад к жанрам».
+
+    Снова загружает список жанров и заменяет сообщение со списком книг
+    на сообщение со списком жанров.
+    """
     genres = await get_all_genres()
 
     # Если жанры были удалены
@@ -74,9 +93,17 @@ async def on_back_to_genres(callback: CallbackQuery):
     )
     await callback.answer()
 
-@router.callback_query(F.data.starts_with("download"))
+@router.callback_query(F.data.regexp(r"^download:\d+:format:[\w-]+$"))
 async def on_download(callback: CallbackQuery):
-    print("!!"*10**5)
+    """
+    Обработчик нажатия на кнопку скачивания файла.
+
+    Ожидаемый формат callback_data:
+        "download:{file_id}:format:{format}"
+
+    По id файла и формату находит путь в БД, собирает полный путь
+    на диске и отправляет документ пользователю.
+    """
     try:
         callback_data_parts = callback.data.split(":")
         book_id = int(callback_data_parts[1])
@@ -92,14 +119,21 @@ async def on_download(callback: CallbackQuery):
     
     full_path = BOOKS_DIR_STORAGE / file_path
     file = FSInputFile(full_path, filename=full_path.name)
-
     await callback.message.answer_document(file, text="Ваш файл готов!")
     await callback.answer()
 
 @router.callback_query(F.data.regexp(r"book:\d+:genre:\d+:page:\d+$"))
 async def on_book_chosen(callback: CallbackQuery):
+    """
+    Обработчик выбора конкретной книги из списка.
+
+    Ожидаемый формат callback_data:
+        "book:{book_id}:genre:{genre_id}:page:{page}"
+
+    Показывает пользователю клавиатуру с доступными форматами
+    (fb2/pdf и т.п.) для выбранной книги.
+    """
     callback_data_parts = callback.data.split(":")
-    print(f"!!!!!!!!!!!!!!!!{callback.data} {callback_data_parts}!!!!!!!!!!!!!!")
     book_id = int(callback_data_parts[1])
     genre_id = int(callback_data_parts[3])
     page = int(callback_data_parts[5])

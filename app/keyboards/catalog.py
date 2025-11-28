@@ -4,9 +4,16 @@ from ..models.book import Genre, Book
 
 
 def genres_keyboard(genres: list[Genre]) -> InlineKeyboardMarkup:
-    keyboard: list[list[InlineKeyboardButton]] = []
+    """
+    Клавиатура со списком жанров.
 
-    # Загружаем жанры в клавиатуру (предполагается не более 10-15)
+    Для каждого жанра создаётся отдельная кнопка:
+
+        "genre:{genre_id}:page:1"
+
+    Страница всегда начинается с 1, дальше пагинацией управляет books_keyboard.
+    """
+    keyboard: list[list[InlineKeyboardButton]] = []
     for genre in genres:
         keyboard.append(
             [
@@ -25,8 +32,21 @@ def books_keyboard(
         total_pages: int,
     ) -> InlineKeyboardMarkup:
     keyboard: list[list[InlineKeyboardButton]] = []
+    """
+    Клавиатура со списком книг конкретного жанра + элементы пагинации.
 
-    # Загружаем книги (не более 10) в клавиатуру
+    - Каждая книга -> отдельная кнопка:
+        "book:{book_id}:genre:{genre_id}:page:{page}"
+      Здесь genre_id и page нужны, чтобы при выборе книги потом
+      можно было корректно вернуться назад на тот же список.
+
+    - Внизу добавляется ряд с пагинацией:
+        [ "⬅️ Назад", "{page}/{total_pages}", "Вперёд ➡️" ]
+      Кнопки "Назад"/"Вперёд" меняют только номер страницы:
+        "genre:{genre_id}:page:{page-1}" / "genre:{genre_id}:page:{page+1}"
+
+    - Ещё ниже — кнопка "⬅️ К жанрам" для возврата к списку жанров.
+    """
     for book in books:
         keyboard.append(
             [
