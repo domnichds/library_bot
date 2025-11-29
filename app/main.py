@@ -6,12 +6,15 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from app.services.file_sync import sync_book_from_fs
+from app.keyboards.main_menu import main_menu_keyboard
 
 from .config import BOT_TOKEN
 from .texts import *
 from .models.db import init_db
 
 from .handlers import catalog as catalog_handler
+from .handlers import book as book_handler
+from .handlers import search as search_handler
 
 bot = Bot(
     token=BOT_TOKEN,
@@ -19,19 +22,14 @@ bot = Bot(
 )
 dp = Dispatcher()
 dp.include_router(catalog_handler.router)
-
-def main_menu_keyboard() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="📚Каталог")],
-            [KeyboardButton(text="🔍Поиск")]
-        ], resize_keyboard=True
-    )
+dp.include_router(book_handler.router)
+dp.include_router(search_handler.router)
 
 @dp.message(F.text == "/start")
 async def command_start(message: Message):
     await message.answer(
-        START_MESSAGE, reply_markup=main_menu_keyboard()
+        START_MESSAGE,
+        reply_markup=main_menu_keyboard()
     )
 
 async def main():
