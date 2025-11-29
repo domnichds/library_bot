@@ -5,6 +5,11 @@ from sqlalchemy import select
 from ..models.book import Book, BookFile
 from ..models.db import async_session_factory
 
+from ..texts import (
+     BOOK_NAME,
+     BOOK_UNKNOWN_BOOK,
+)
+
 async def get_book_files(book_id: int) -> list[BookFile]:
     """
     Возвращает список объектов BookFile для указанной книги.
@@ -60,5 +65,5 @@ async def get_book_name(book_id: int) -> str:
         )
         book_obj = book.scalar_one_or_none()
         if book_obj is None:
-            return "Неизвестная книга"
-        return f"{book_obj.title} — {book_obj.author}"
+            return BOOK_UNKNOWN_BOOK
+        return BOOK_NAME.format(title=book_obj.title, author=book_obj.author)

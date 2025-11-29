@@ -5,8 +5,13 @@ from app.keyboards.catalog import catalog_format_keyboard
 from app.keyboards.search import search_format_keyboard
 from app.services.book import get_book_file_path, get_book_name
 
-from ..config_storage import BOOKS_DIR_STORAGE
-from ..texts import BOOK_SELECT_FORMAT
+from ..config.storage import BOOKS_DIR_STORAGE
+from ..texts import (
+    BOOK_SELECT_FORMAT,
+    BOOK_DOWNLOAD_ERROR_DATA_NOT_FOUND,
+    BOOK_DOWNLOAD_ERROR_FILE_NOT_FOUND,
+    BOOK_READY_CAPTION
+)
 
 router = Router()
 
@@ -26,11 +31,11 @@ async def on_download(callback: CallbackQuery):
         book_id = int(callback_data_parts[1])
         book_format = callback_data_parts[3]
     except (ValueError, IndexError):
-        await callback.answer("Ошибка в данных для загрузки файла", show_alert=True)
+        await callback.answer(BOOK_DOWNLOAD_ERROR_DATA_NOT_FOUND, show_alert=True)
         return
     file_path = await get_book_file_path(book_id, book_format)
     if file_path is None:
-        await callback.answer("Файл не найден", show_alert=True)
+        await callback.answer(BOOK_DOWNLOAD_ERROR_FILE_NOT_FOUND, show_alert=True)
         return
     
     full_path = BOOKS_DIR_STORAGE / file_path
@@ -44,7 +49,7 @@ async def on_download(callback: CallbackQuery):
     book_name = await get_book_name(book_id)
     await callback.message.answer_document(
         file,
-        caption=f"Книга готова к загрузке.\n\n<b>{book_name}</b>"
+        caption=BOOK_READY_CAPTION.format(book_name=book_name)
     )
     await callback.answer()
 

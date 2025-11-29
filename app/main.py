@@ -1,18 +1,17 @@
 import asyncio
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from app.services.file_sync import sync_book_from_fs
 
-from .config import BOT_TOKEN
+from app.config.bot import BOT_TOKEN
 from .handlers import book as book_handler
 from .handlers import catalog as catalog_handler
 from .handlers import main_menu as main_menu_handler
 from .handlers import search as search_handler
 from .models.db import init_db
-from .texts import *
 
 bot = Bot(
     token=BOT_TOKEN,

@@ -6,11 +6,19 @@ from app.keyboards.main_menu import back_to_main_menu, main_menu_keyboard
 from app.keyboards.search import books_search_keyboard
 from app.services.search import search_books
 from app.states.search import SearchState
-from app.texts import START_MESSAGE
+from app.texts import(
+    START_MESSAGE,
+    BUTTON_MENU_SEARCH,
+    BUTTON_BACK_TO_MAIN_MENU,
+    SEARCH_PROMPT,
+    SEARCH_EMPTY_QUERY,
+    SEARCH_NO_RESULTS,
+    SEARCH_RESULT,
+)
 
 router = Router()
 
-@router.message(F.text == "🔍Поиск")
+@router.message(F.text == BUTTON_MENU_SEARCH)
 async def start_search(message: Message, state: FSMContext) -> None:
     """
     Обработчик команды/кнопки «🔍Поиск».
@@ -19,7 +27,7 @@ async def start_search(message: Message, state: FSMContext) -> None:
     """
     await state.set_state(SearchState.waiting_for_query)
     await message.answer(
-        "Введите название книги для поиска:",
+        SEARCH_PROMPT,
         reply_markup=back_to_main_menu()
     )
 
@@ -33,7 +41,7 @@ async def handle_search_query(message: Message, state: FSMContext) -> None:
     """
     query = message.text.strip()
 
-    if query == "🏠 В главное меню":
+    if query == BUTTON_BACK_TO_MAIN_MENU:
         await state.clear()
         await message.answer(
             START_MESSAGE,
@@ -42,7 +50,7 @@ async def handle_search_query(message: Message, state: FSMContext) -> None:
         return
 
     if not query:
-        await message.answer("Пустой запрос. Попробуйте еще раз")
+        await message.answer(SEARCH_EMPTY_QUERY)
         return
 
     books = await search_books(query)
@@ -51,15 +59,15 @@ async def handle_search_query(message: Message, state: FSMContext) -> None:
 
     if not books:
         await state.set_state(SearchState.waiting_for_query)
-        await message.answer(f"По запросу «{query}» ничего не найдено")
+        await message.answer(SEARCH_NO_RESULTS.format(query=query))
         await message.answer(
-            "Введите название книги для поиска:",
+            SEARCH_PROMPT,
             reply_markup=back_to_main_menu()
         )
         return
     
     await message.answer(
-        f"Результаты поиска по запросу:\n\n<code>{query}</code>",
+        SEARCH_RESULT.format(query=query),
         reply_markup=books_search_keyboard(books)
     )
 
@@ -76,6 +84,6 @@ async def on_back_to_search(callback: CallbackQuery, state: FSMContext) -> None:
 
     await callback.bot.send_message(
         callback.from_user.id,
-        "Введите название книги для поиска:",
+        SEARCH_PROMPT,
         reply_markup=back_to_main_menu()
     )
