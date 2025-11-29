@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.book import Book, BookFile, Genre
 from app.models.db import async_session_factory
-from ..config_storage import BOOKS_DIR_STORAGE, GENRE_MAP
+from ..config.storage import BOOKS_DIR_STORAGE, GENRE_MAP
 
 
 @dataclass

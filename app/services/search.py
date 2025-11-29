@@ -6,10 +6,12 @@ from sqlalchemy import select
 from ..models.book import Book
 from ..models.db import async_session_factory
 
+from ..config.search import (SEARCH_LIMIT, SEARCH_MIN_SCORE)
+
 async def search_books(
         query: str,
-        limit: int = 10,
-        min_score: int = 50
+        limit: int = SEARCH_LIMIT,
+        min_score: int = SEARCH_MIN_SCORE
 ) -> List[Book]:
     """
     Поиск книг по свободному тексту (название/автор) с учётом опечаток.

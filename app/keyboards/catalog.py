@@ -3,6 +3,14 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from ..models.book import Book, Genre
 from ..services.book import get_book_files
 
+from ..texts import (
+    KEYBOARD_BACK_TO_GENRE,
+    KEYBOARD_NEXT,
+    KEYBOARD_PREV,
+    KEYBOARD_PAGES,
+    KEYBOARD_NO_GENRES,
+    KEYBOARD_BOOK_NAME
+)
 def genres_keyboard(genres: list[Genre]) -> InlineKeyboardMarkup:
     """
     Клавиатура со списком жанров.
@@ -43,7 +51,7 @@ async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> Inl
         keyboard.append(
             [
                 InlineKeyboardButton(
-                    text="Нет доступных файлов",
+                    text=KEYBOARD_NO_GENRES,
                     callback_data="noop"
                 )
             ]
@@ -61,7 +69,7 @@ async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> Inl
     keyboard.append(
         [
             InlineKeyboardButton(
-                text="⬅️ Назад",
+                text=KEYBOARD_PREV,
                 callback_data=f"genre:{genre_id}:page:{page}"
             )
         ]
@@ -95,7 +103,7 @@ def books_catalog_keyboard(
         keyboard.append(
             [
                 InlineKeyboardButton(
-                    text=f"{book.title} — {book.author}",
+                    text=KEYBOARD_BOOK_NAME.format(title=book.title, author=book.author),
                     callback_data=f"book:{book.id}:genre:{genre_id}:page:{page}"
                 )
             ]
@@ -106,7 +114,7 @@ def books_catalog_keyboard(
     if page > 1:
         nav_row.append(
             InlineKeyboardButton(
-                text="⬅️ Назад",
+                text=KEYBOARD_PREV,
                 callback_data=f"genre:{genre_id}:page:{page - 1}"
             )
         )
@@ -114,7 +122,7 @@ def books_catalog_keyboard(
     # Добавляем кнопку с текущей страницей
     nav_row.append(
         InlineKeyboardButton(
-            text=f"{page}/{total_pages}",
+            text=KEYBOARD_PAGES.format(page=page, total_pages=total_pages),
             callback_data="noop" # Кнопка без функционала
         )
     )
@@ -123,7 +131,7 @@ def books_catalog_keyboard(
     if page < total_pages:
         nav_row.append(
             InlineKeyboardButton(
-                text="Вперёд ➡️",
+                text=KEYBOARD_NEXT,
                 callback_data=f"genre:{genre_id}:page:{page + 1}"
             )
         )
@@ -134,7 +142,7 @@ def books_catalog_keyboard(
     keyboard.append(
         [
             InlineKeyboardButton(
-                text="⬅️ К жанрам",
+                text=KEYBOARD_BACK_TO_GENRE,
                 callback_data="back:genres"
             )
         ]

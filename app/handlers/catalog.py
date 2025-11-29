@@ -9,12 +9,15 @@ from ..texts import (
     CATALOG_CHOOSE_GENRE,
     CATALOG_NO_BOOKS,
     CATALOG_NO_GENRES,
-    CATALOG_CURRENT_GENRE
+    CATALOG_CURRENT_GENRE,
+    CATALOG_WELCOME,
+    BUTTON_MENU_CATALOG,
+    CATALOG_GENRE_CHOOSE_ERROR
 )
 
 router = Router()
 
-@router.message(F.text == "📚Каталог")
+@router.message(F.text == BUTTON_MENU_CATALOG)
 async def catalog_entery(message: Message):
     """
     Обработчик команды/кнопки «📚Каталог».
@@ -29,7 +32,7 @@ async def catalog_entery(message: Message):
         return
 
     await message.answer(
-        "Добро пожаловать в каталог.",
+        CATALOG_WELCOME,
         reply_markup=back_to_main_menu()
     )
 
@@ -54,7 +57,7 @@ async def on_genre_chosen(callback: CallbackQuery):
         genre_id = int(parts[1])
         page_id = int(parts[3])
     except (ValueError, IndexError) as e:
-        await callback.answer("Ошибка выбора жанра")
+        await callback.answer(CATALOG_GENRE_CHOOSE_ERROR)
         return
     
     # Получаем книги для выбранного жанра и страницы

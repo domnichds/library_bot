@@ -3,6 +3,11 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from ..models.book import Book
 from ..services.book import get_book_files
 
+from ..texts import (
+    KEYBOARD_BACK_TO_SEARCH,
+    KEYBOARD_BOOK_NAME,
+    KEYBOARD_NO_FILES,
+)
 
 def books_search_keyboard(books: list[Book]) -> InlineKeyboardMarkup:
     """
@@ -17,7 +22,7 @@ def books_search_keyboard(books: list[Book]) -> InlineKeyboardMarkup:
         keyboard.append(
             [
                 InlineKeyboardButton(
-                    text=f"{book.title} — {book.author}",
+                    text=KEYBOARD_BOOK_NAME.format(title=book.title, author=book.author),
                     callback_data=f"book:{book.id}"
                 )
             ]
@@ -26,7 +31,7 @@ def books_search_keyboard(books: list[Book]) -> InlineKeyboardMarkup:
     keyboard.append(
         [
             InlineKeyboardButton(
-                text="⬅️ К поиску",
+                text=KEYBOARD_BACK_TO_SEARCH,
                 callback_data="back:search"
             )
         ]
@@ -52,7 +57,7 @@ async def search_format_keyboard(book_id: int) -> InlineKeyboardMarkup:
         keyboard.append(
             [
                 InlineKeyboardButton(
-                    text="Нет доступных файлов",
+                    text=KEYBOARD_NO_FILES,
                     callback_data="noop"
                 )
             ]
@@ -70,7 +75,7 @@ async def search_format_keyboard(book_id: int) -> InlineKeyboardMarkup:
     keyboard.append(
         [
             InlineKeyboardButton(
-                text="⬅️ К поиску",
+                text=KEYBOARD_BACK_TO_SEARCH,
                 callback_data=f"back:search"
             )
         ]
