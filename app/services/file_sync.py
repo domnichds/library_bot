@@ -1,12 +1,12 @@
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..config_storage import BOOKS_DIR_STORAGE, GENRE_MAP
+from app.models.book import Book, BookFile, Genre
 from app.models.db import async_session_factory
-from app.models.book import Genre, Book, BookFile
+from ..config_storage import BOOKS_DIR_STORAGE, GENRE_MAP
 
 
 @dataclass
@@ -26,17 +26,6 @@ def parse_file_path(file_path: Path) -> BookData:
 
     Ожидаемая структура пути относительно BOOKS_DIR_STORAGE:
         /<genre_slug>/<Название> - <Автор>.<расширение>
-
-    Например:
-        /fantasy/Hobbit - Tolkien.fb2
-
-    Вернёт:
-        BookData(
-            genre='fantasy',
-            title='Hobbit',
-            author='Tolkien',
-            format='fb2',
-        )
     """
     rel_path = file_path.relative_to(BOOKS_DIR_STORAGE)
     path = rel_path.parts
@@ -166,7 +155,7 @@ async def get_or_create_book_file(
 
 async def sync_book_from_fs() -> None:
     """
-    Обойти локальный каталог BOOKS_DIR_STORAGE и синхронизировать содержимое с БД.
+    Обходит локальный каталог BOOKS_DIR_STORAGE и синхронизирует содержимое с БД.
 
     Алгоритм:
       - рекурсивно ищем все файлы в BOOKS_DIR_STORAGE;

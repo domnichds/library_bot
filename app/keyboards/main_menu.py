@@ -8,3 +8,11 @@ def main_menu_keyboard() -> ReplyKeyboardMarkup:
         ],
         resize_keyboard=True
     )
+
+def back_to_main_menu() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🏠 В главное меню")]
+        ],
+        resize_keyboard=True
+    )

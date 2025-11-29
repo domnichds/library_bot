@@ -1,11 +1,16 @@
 from typing import List
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
+from ..models.book import Book, Genre
 from ..models.db import async_session_factory
-from ..models.book import Genre, Book
 
 async def get_all_genres() -> List[Genre]:
+    """
+    Возвращает все жанры отсортированные по имени.
+
+    Используется для построения главного каталога жанров.
+    """
     async with async_session_factory() as session:
         result = await session.execute(
             select(Genre).order_by(Genre.name)
@@ -17,7 +22,19 @@ async def get_books_page_by_genre(
         page: int,
         page_size: int = 10,
     ) -> tuple[List[Book], int]:
+    """
+    Получает одну страницу списка книг для указанного жанра.
 
+    Параметры:
+      - genre_id: id жанра, по которому фильтруем книги.
+      - page: номер страницы (1-based). Если он выходит за допустимый диапазон,
+        будет автоматически "подрезан" до ближайшего корректного.
+      - page_size: количество книг на одной странице.
+
+    Возвращает:
+      - список книг для текущей страницы;
+      - общее количество страниц total_pages (0, если в жанре нет книг).
+    """
     async with async_session_factory() as session:
         # Подсчитываем общее количество книг в жанре
         count_result = await session.execute(

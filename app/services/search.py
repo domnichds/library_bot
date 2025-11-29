@@ -1,11 +1,10 @@
 from typing import List
 
+from rapidfuzz import fuzz
 from sqlalchemy import select
 
-from rapidfuzz import fuzz
-
-from ..models.db import async_session_factory
 from ..models.book import Book
+from ..models.db import async_session_factory
 
 async def search_books(
         query: str,

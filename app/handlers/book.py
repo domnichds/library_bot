@@ -1,15 +1,12 @@
-from aiogram import Router, F
+from aiogram import F, Router
+from aiogram.types import CallbackQuery, FSInputFile
 
-from aiogram.types import Message, CallbackQuery, FSInputFile
-
+from app.keyboards.catalog import catalog_format_keyboard
+from app.keyboards.search import search_format_keyboard
 from app.services.book import get_book_file_path, get_book_name
-from app.keyboards.book import search_format_keyboard, catalog_format_keyboard
-from app.keyboards.search import search_back_to_main_menu
 
 from ..config_storage import BOOKS_DIR_STORAGE
-from ..texts import (
-    BOOK_SELECT_FORMAT
-)
+from ..texts import BOOK_SELECT_FORMAT
 
 router = Router()
 
@@ -47,8 +44,7 @@ async def on_download(callback: CallbackQuery):
     book_name = await get_book_name(book_id)
     await callback.message.answer_document(
         file,
-        caption=f"Книга готова к загрузке.\n\n<b>{book_name}</b>",
-        reply_markup=search_back_to_main_menu(),
+        caption=f"Книга готова к загрузке.\n\n<b>{book_name}</b>"
     )
     await callback.answer()
 
@@ -77,6 +73,15 @@ async def on_catalog_book_chosen(callback: CallbackQuery):
 
 @router.callback_query(F.data.regexp(r"book:\d+$"))
 async def on_search_book_chosen(callback: CallbackQuery):
+    """
+    Обработчик выбора книги из поиска: показывает доступные форматы и подтверждает колбэк.
+
+    Ожидаемый формат callback_data:
+        "book:{book_id}"
+    
+    Показывает пользователю клавиатуру с доступными форматами
+    (fb2/pdf и т.п.) для выбранной книги.
+    """
     callback_data_parts = callback.data.split(":")
     book_id = int(callback_data_parts[1])
 

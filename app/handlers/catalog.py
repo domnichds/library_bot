@@ -1,10 +1,9 @@
-from aiogram import Router, F
+from aiogram import F, Router
+from aiogram.types import CallbackQuery, Message
 
-from aiogram.types import Message, CallbackQuery
-
+from app.keyboards.catalog import books_catalog_keyboard, genres_keyboard
+from app.keyboards.main_menu import back_to_main_menu
 from app.services.catalog import get_all_genres, get_books_page_by_genre
-from app.keyboards.catalog import genres_keyboard
-from app.keyboards.book import books_catalog_keyboard
 
 from ..texts import (
     CATALOG_CHOOSE_GENRE,
@@ -30,6 +29,11 @@ async def catalog_entery(message: Message):
         return
 
     await message.answer(
+        "Добро пожаловать в каталог.",
+        reply_markup=back_to_main_menu()
+    )
+
+    await message.answer(   
         CATALOG_CHOOSE_GENRE,
         reply_markup=genres_keyboard(genres)
     )
