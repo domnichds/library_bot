@@ -1,0 +1,81 @@
+from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
+
+from app.keyboards.main_menu import back_to_main_menu, main_menu_keyboard
+from app.keyboards.search import books_search_keyboard
+from app.services.search import search_books
+from app.states.search import SearchState
+from app.texts import START_MESSAGE
+
+router = Router()
+
+@router.message(F.text == "🔍Поиск")
+async def start_search(message: Message, state: FSMContext) -> None:
+    """
+    Обработчик команды/кнопки «🔍Поиск».
+
+    Вводит пользователя в режим поиска книг.
+    """
+    await state.set_state(SearchState.waiting_for_query)
+    await message.answer(
+        "Введите название книги для поиска:",
+        reply_markup=back_to_main_menu()
+    )
+
+@router.message(SearchState.waiting_for_query)
+async def handle_search_query(message: Message, state: FSMContext) -> None:
+    """
+    Обрабатывает введённый пользователем поисковый запрос.
+
+    - Переходит в состояние ожидания нового запроса, если ничего не найдено.
+    - Игнорирует сообщение о возврате в главное меню.
+    """
+    query = message.text.strip()
+
+    if query == "🏠 В главное меню":
+        await state.clear()
+        await message.answer(
+            START_MESSAGE,
+            reply_markup=main_menu_keyboard()
+        )
+        return
+
+    if not query:
+        await message.answer("Пустой запрос. Попробуйте еще раз")
+        return
+
+    books = await search_books(query)
+    
+    await state.clear()
+
+    if not books:
+        await state.set_state(SearchState.waiting_for_query)
+        await message.answer(f"По запросу «{query}» ничего не найдено")
+        await message.answer(
+            "Введите название книги для поиска:",
+            reply_markup=back_to_main_menu()
+        )
+        return
+    
+    await message.answer(
+        f"Результаты поиска по запросу:\n\n<code>{query}</code>",
+        reply_markup=books_search_keyboard(books)
+    )
+
+@router.callback_query(F.data == "back:search")
+async def on_back_to_search(callback: CallbackQuery, state: FSMContext) -> None:
+    """
+    Возвращает пользователя к вводу поискового запроса.
+    """
+    await callback.answer()
+    await state.set_state(SearchState.waiting_for_query)
+
+    if callback.message:
+        await callback.message.delete()
+
+    await callback.bot.send_message(
+        callback.from_user.id,
+        "Введите название книги для поиска:",
+        reply_markup=back_to_main_menu()
+    )
