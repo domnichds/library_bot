@@ -25,10 +25,10 @@ dp.include_router(main_menu_handler.router)
 
 
 async def main():
+    await init_db()
     await sync_book_from_fs()
     try:
         print("Бот запущен. Нажмите ctrl + c для остановки.")
-        await init_db()
         await dp.start_polling(bot)
     except Exception as e:
         print(f"Ошибка: {e}")
