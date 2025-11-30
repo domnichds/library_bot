@@ -2,6 +2,7 @@ from typing import List
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import TSVECTOR
 
 from .db import Base
 
@@ -40,6 +41,11 @@ class Book(Base):
     files: Mapped[List["BookFile"]] = relationship(
         back_populates="book",
         cascade="all, delete-orphan"
+    )
+
+    search_vector: Mapped[str] = mapped_column(
+        TSVECTOR,
+        nullable=True,
     )
 
     def __repr__(self) -> str:
