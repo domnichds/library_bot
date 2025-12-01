@@ -1,77 +1,86 @@
-from typing import List
+from typing import List, Tuple
 
-from sqlalchemy import select, func
+from rapidfuzz import fuzz
+from sqlalchemy import or_, select, func
 
-from ..models.book import Book
-from ..models.db import async_session_factory
-from ..config.search import SEARCH_LIMIT
+from app.config.search import SEARCH_LIMIT, SEARCH_MIN_SCORE
+from app.models.book import Book
+from app.models.db import async_session_factory
 
 
-FTS_LANGUAGE = "russian"
-ALPHA = 0.8
-MIN_SIMILARITY = 0.15
+# Сколько максимум кандидатов брать из БД перед RapidFuzz
+CANDIDATES_LIMIT = 1000
 
-async def search_books(
-        query: str,
-        limit: int = SEARCH_LIMIT,
-) -> List[Book]:
+
+def _book_key(book: Book) -> str:
     """
-    Поиск книг в PostgreSQL с учётом опечаток.
-
-    - Основной поиск: FTS по колонке Book.search_vector.
-    - Ранжирование: комбинированный скор rank + similarity по "title + author".
-    - Если FTS ничего не нашёл — fallback на триграммы.
-
-    Требования в БД:
-      - столбец books.search_vector tsvector
-      - индекс:
-          CREATE INDEX idx_books_search_vector
-          ON books USING gin (search_vector);
-      - расширения pg_trgm (для similarity и %)
+    Строка, по которой считаем похожесть.
     """
-    normolized_query = query.strip().lower()
-    if not normolized_query:
+    return f"{book.title} — {book.author}"
+
+
+async def _get_candidates_from_db(query: str) -> List[Book]:
+    """
+    Достаём из БД кандидатов по отдельным словам запроса.
+    Не требуем точного совпадения всей фразы, чтобы дать шанс
+    RapidFuzz догадаться при опечатках.
+    """
+    words = [w.strip() for w in query.split() if w.strip()]
+    if not words:
         return []
 
     async with async_session_factory() as session:
-        ta = Book.title + " " + Book.author
-        
-        # Превращаем запрос в tsquery
-        tsq = func.plainto_tsquery(FTS_LANGUAGE, normolized_query)
-        # Получаем ссылку на колонку tsvector
-        tvs = Book.search_vector
+        conditions = []
 
-        # Считаем похожесть запроса и колонки title+author (0 - менее похожи, 1 - идентичны)
-        rank_expr = func.ts_rank_cd(tvs, tsq)
-        # Считаем похожесть по триграммам (1 - идентичны, 0 - не похожи )
-        sim_expr = func.similarity(func.lower(ta), normolized_query)
+        for w in words:
+            pattern = f"%{w.lower()}%"
+            conditions.append(
+                or_(
+                    func.lower(Book.title).like(pattern),
+                    func.lower(Book.author).like(pattern),
+                )
+            )
 
-        combined_score = rank_expr * ALPHA + sim_expr * (1 - ALPHA)
+        where_clause = or_(*conditions)
 
-        stmt_fts = (
+        stmt = (
             select(Book)
-            .where(tvs.op("@@")(tsq))
-            .order_by(combined_score.desc())
-            .limit(limit)
+            .where(where_clause)
+            .limit(CANDIDATES_LIMIT)
         )
 
-        res_fts = await session.execute(stmt_fts)
-        books_fts: List[Book] = list(res_fts.scalars().all())
+        result = await session.execute(stmt)
+        books: List[Book] = list(result.scalars().all())
+        return books
 
-        if books_fts:
-            return books_fts
 
-        stmt_trgm = (
-            select(Book)
-            .where(func.lower(ta).op("%")(normolized_query)) 
-            .where(sim_expr >= MIN_SIMILARITY)
-            .order_by(sim_expr.desc())
-            .limit(limit)
-        )
+async def search_books(
+    query: str,
+    limit: int = SEARCH_LIMIT,
+    min_score: int = SEARCH_MIN_SCORE,
+) -> List[Book]:
+    """
+    Поиск книг с учётом опечаток (RapidFuzz), но без выкачивания всей
+    таблицы в память.
+    """
+    q = (query or "").strip()
+    if not q:
+        return []
 
-        res_trgm = await session.execute(stmt_trgm)
-        books_trgm: List[Book] = list(res_trgm.scalars().all())
+    candidates = await _get_candidates_from_db(q)
+    if not candidates:
+        return []
 
-        return books_trgm
+    results: List[Tuple[Book, float]] = []
 
-    
+    for book in candidates:
+        key = _book_key(book)
+        score = fuzz.WRatio(q, key)
+        if score >= min_score:
+            results.append((book, score))
+
+    results.sort(key=lambda item: item[1], reverse=True)
+
+    best_books: List[Book] = [item[0] for item in results[:limit]]
+
+    return best_books
