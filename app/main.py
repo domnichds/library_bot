@@ -11,6 +11,7 @@ from .handlers import book as book_handler
 from .handlers import catalog as catalog_handler
 from .handlers import main_menu as main_menu_handler
 from .handlers import search as search_handler
+from .handlers import qa as qa_handler
 from .models.db import init_db
 
 bot = Bot(
@@ -22,6 +23,7 @@ dp.include_router(catalog_handler.router)
 dp.include_router(book_handler.router)
 dp.include_router(search_handler.router)
 dp.include_router(main_menu_handler.router)
+dp.include_router(qa_handler.router)
 
 
 async def main():

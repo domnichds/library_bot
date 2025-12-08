@@ -7,6 +7,7 @@ from ..texts import (
     KEYBOARD_BACK_TO_SEARCH,
     KEYBOARD_BOOK_NAME,
     KEYBOARD_NO_FILES,
+    KEYBOARD_AI_QA,
 )
 
 def books_search_keyboard(books: list[Book]) -> InlineKeyboardMarkup:
@@ -77,6 +78,15 @@ async def search_format_keyboard(book_id: int) -> InlineKeyboardMarkup:
             InlineKeyboardButton(
                 text=KEYBOARD_BACK_TO_SEARCH,
                 callback_data=f"back:search"
+            )
+        ]
+    )
+
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                text=KEYBOARD_AI_QA,
+                callback_data=f"qa:{book_id}"
             )
         ]
     )

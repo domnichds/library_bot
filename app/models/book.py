@@ -43,11 +43,6 @@ class Book(Base):
         cascade="all, delete-orphan"
     )
 
-    search_vector: Mapped[str] = mapped_column(
-        TSVECTOR,
-        nullable=True,
-    )
-
     def __repr__(self) -> str:
         return f"Book(id={self.id!r}, title={self.title!r}, author={self.author!r})"
     
