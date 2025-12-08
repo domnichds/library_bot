@@ -21,8 +21,8 @@ async def get_user_count(user_id: int) -> int:
                 UserLimit.date == today
             )
         )
-        count = res.scalar_one_or_none()
-        return int(count or 0)
+        record = res.scalar_one_or_none()
+        return int(record.count) if record else 0
     
 async def check_daily_limit(user_id: int) -> bool:
     """
@@ -50,6 +50,7 @@ async def increment_daily_count(user_id: int) -> Tuple[int, bool]:
         if record is None:
             record = UserLimit(user_id=user_id, date=today, count=1)
             session.add(record)
+            await session.commit()
 
             return 1, True
 
@@ -58,5 +59,6 @@ async def increment_daily_count(user_id: int) -> Tuple[int, bool]:
         
         record.count += 1
         session.add(record)
+        await session.commit()
         return record.count, True
         
