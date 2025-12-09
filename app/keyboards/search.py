@@ -76,17 +76,16 @@ async def search_format_keyboard(book_id: int) -> InlineKeyboardMarkup:
     keyboard.append(
         [
             InlineKeyboardButton(
-                text=KEYBOARD_BACK_TO_SEARCH,
-                callback_data=f"back:search"
+                text=KEYBOARD_AI_QA,
+                callback_data=f"qa:search:{book_id}"
             )
         ]
     )
-
     keyboard.append(
         [
             InlineKeyboardButton(
-                text=KEYBOARD_AI_QA,
-                callback_data=f"qa:{book_id}"
+                text=KEYBOARD_BACK_TO_SEARCH,
+                callback_data=f"back:search"
             )
         ]
     )

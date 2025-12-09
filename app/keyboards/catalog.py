@@ -70,16 +70,16 @@ async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> Inl
     keyboard.append(
         [
             InlineKeyboardButton(
-                text=KEYBOARD_PREV,
-                callback_data=f"genre:{genre_id}:page:{page}"
+                text=KEYBOARD_AI_QA,
+                callback_data=f"qa:catalog:{book_id}:{genre_id}:{page}"
             )
         ]
     )
     keyboard.append(
         [
             InlineKeyboardButton(
-                text=KEYBOARD_AI_QA,
-                callback_data=f"qa:{book_id}"
+                text=KEYBOARD_PREV,
+                callback_data=f"genre:{genre_id}:page:{page}"
             )
         ]
     )
