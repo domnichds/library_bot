@@ -8,8 +8,9 @@ from ..texts import (
     KEYBOARD_NEXT,
     KEYBOARD_PREV,
     KEYBOARD_PAGES,
-    KEYBOARD_NO_GENRES,
-    KEYBOARD_BOOK_NAME
+    KEYBOARD_NO_FILES,
+    KEYBOARD_BOOK_NAME,
+    KEYBOARD_AI_QA,
 )
 def genres_keyboard(genres: list[Genre]) -> InlineKeyboardMarkup:
     """
@@ -51,7 +52,7 @@ async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> Inl
         keyboard.append(
             [
                 InlineKeyboardButton(
-                    text=KEYBOARD_NO_GENRES,
+                    text=KEYBOARD_NO_FILES,
                     callback_data="noop"
                 )
             ]
@@ -66,6 +67,14 @@ async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> Inl
                     )
                 ]
             )
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                text=KEYBOARD_AI_QA,
+                callback_data=f"qa:catalog:{book_id}:{genre_id}:{page}"
+            )
+        ]
+    )
     keyboard.append(
         [
             InlineKeyboardButton(

@@ -30,7 +30,8 @@ async def init_db() -> None:
     Инициализирует базу данных: создаёт таблицы, если их ещё нет.
     """
     # импортируем модели внутри функции, чтобы зарегистрировать метаданные
-    from .book import Genre, Book, BookFile  # noqa: F401
+    from .book import Genre, Book, BookFile
+    from .user_limit import UserLimit
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
