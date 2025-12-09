@@ -49,6 +49,10 @@ async def _return_to_format_keyboard(
     genre_id: int | None,
     page: int | None,
 ):
+    """
+    Возвращает пользователя к клавиатуре выбора формата книги
+    после обработки вопроса
+    """
     keyboard = await _build_format_keyboard(source, book_id, genre_id, page)
     if keyboard is None:
         await message.answer(QA_ERROR_BAD_REQUEST)
@@ -60,6 +64,11 @@ async def _return_to_format_keyboard(
 
 @router.callback_query(F.data.regexp(r"^qa:"))
 async def on_ask_question_click(callback: CallbackQuery, state: FSMContext):
+    """
+    Обработчик нажатия на кнопку «Задать нейросети вопрос по книге».
+    Разбивает callback_data, проверяет лимит запросов пользователя
+    и переводит пользователя в состояние ввода вопроса.
+    """
     try:
         parts = callback.data.split(":")
         source_raw = parts[1]
@@ -95,6 +104,10 @@ async def on_ask_question_click(callback: CallbackQuery, state: FSMContext):
 
 @router.message(QAStates.waiting_for_question)
 async def receive_question(message: Message, state: FSMContext):
+    """
+    Обрабатывает пользовательский вопрос о книге, проверяет корректность вводимых данных и ограничение на количество запросов,
+    затем запрашивает ответ у LLM и возвращает пользователя к клавиатуре выбора формата.
+    """
     data = await state.get_data()
     if not data:
         await message.answer(QA_ERROR_BAD_REQUEST)
