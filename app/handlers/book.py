@@ -10,7 +10,8 @@ from ..texts import (
     BOOK_SELECT_FORMAT,
     BOOK_DOWNLOAD_ERROR_DATA_NOT_FOUND,
     BOOK_DOWNLOAD_ERROR_FILE_NOT_FOUND,
-    BOOK_READY_CAPTION
+    BOOK_READY_CAPTION,
+    BOOK_SENDING_IN_PROGRESS,
 )
 
 router = Router()
@@ -45,12 +46,25 @@ async def on_download(callback: CallbackQuery):
         await callback.message.delete()
     except Exception:
         pass
+    
+    status_message = None
+    try:
+        status_message = await callback.message.answer(BOOK_SENDING_IN_PROGRESS)
+    except Exception:
+        pass
 
     book_name = await get_book_name(book_id)
-    await callback.message.answer_document(
-        file,
-        caption=BOOK_READY_CAPTION.format(book_name=book_name)
-    )
+    try:
+        await callback.message.answer_document(
+            file,
+            caption=BOOK_READY_CAPTION.format(book_name=book_name)
+        )
+    finally:
+        if status_message is not None:
+            try:
+                await status_message.delete()
+            except Exception:
+                pass
     await callback.answer()
 
 @router.callback_query(F.data.regexp(r"book:\d+:genre:\d+:page:\d+$"))
