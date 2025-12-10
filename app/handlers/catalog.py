@@ -12,15 +12,16 @@ from ..texts import (
     CATALOG_CURRENT_GENRE,
     CATALOG_WELCOME,
     BUTTON_MENU_CATALOG,
-    CATALOG_GENRE_CHOOSE_ERROR
+    CATALOG_GENRE_CHOOSE_ERROR,
 )
 
 router = Router()
 
+
 @router.message(F.text == BUTTON_MENU_CATALOG)
 async def catalog_entery(message: Message):
     """
-    Обработчик команды/кнопки «📚Каталог».
+    Обработчик команды/кнопки «📚 Каталог».
 
     Загружает список жанров из БД и показывает пользователю
     клавиатуру с жанрами. Если жанров нет, выводит соответствующее сообщение.
@@ -33,15 +34,16 @@ async def catalog_entery(message: Message):
 
     await message.answer(
         CATALOG_WELCOME,
-        reply_markup=back_to_main_menu()
+        reply_markup=back_to_main_menu(),
     )
 
-    await message.answer(   
+    await message.answer(
         CATALOG_CHOOSE_GENRE,
-        reply_markup=genres_keyboard(genres)
+        reply_markup=genres_keyboard(genres),
     )
 
-@router.callback_query(F.data.regexp("^genre:\d+:page:\d+$"))
+
+@router.callback_query(F.data.regexp(r"^genre:\d+:page:\d+$"))
 async def on_genre_chosen(callback: CallbackQuery):
     """
     Обработчик выбора жанра или переключения страниц списка книг.
@@ -70,7 +72,7 @@ async def on_genre_chosen(callback: CallbackQuery):
 
     await callback.message.edit_text(
         CATALOG_CURRENT_GENRE,
-        reply_markup=books_catalog_keyboard(books, genre_id, page_id, total_pages)
+        reply_markup=books_catalog_keyboard(books, genre_id, page_id, total_pages),
     )
     await callback.answer()
 
@@ -92,6 +94,6 @@ async def on_back_to_genres(callback: CallbackQuery):
 
     await callback.message.edit_text(
         CATALOG_CHOOSE_GENRE,
-        reply_markup=genres_keyboard(genres)
+        reply_markup=genres_keyboard(genres),
     )
     await callback.answer()

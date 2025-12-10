@@ -66,7 +66,3 @@ async def ask_book_question(
         raise LLMError(f"Пустой текст в ответе LLM: {data}")
 
     return text.strip()
-
-
-if __name__ == "__main__":
-    print(asyncio.run(ask_book_question("Война и мир", "хуй")))

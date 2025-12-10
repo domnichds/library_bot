@@ -6,7 +6,9 @@ from ..texts import (
     BUTTON_BACK_TO_MAIN_MENU,
 )
 
+
 def main_menu_keyboard() -> ReplyKeyboardMarkup:
+    """Клавиатура главного меню."""
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text=BUTTON_MENU_CATALOG)],
@@ -15,7 +17,9 @@ def main_menu_keyboard() -> ReplyKeyboardMarkup:
         resize_keyboard=True
     )
 
+
 def back_to_main_menu() -> ReplyKeyboardMarkup:
+    """Клавиатура с кнопкой возврата в главное меню."""
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text=BUTTON_BACK_TO_MAIN_MENU)]

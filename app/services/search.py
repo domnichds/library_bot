@@ -1,20 +1,19 @@
-from typing import List, Tuple, Set
 import re
+from typing import List, Tuple, Set
 
 from rapidfuzz import fuzz
 from sqlalchemy import or_, select, func
 
-from app.config.search import SEARCH_LIMIT, SEARCH_MIN_SCORE
+from app.config.search import (
+    AUTHOR_WEIGHT,
+    CANDIDATES_LIMIT,
+    SEARCH_LIMIT,
+    SEARCH_MIN_SCORE,
+    TITLE_WEIGHT,
+)
 from app.models.book import Book
 from app.models.db import async_session_factory
 
-
-# Сколько максимум кандидатов брать из БД перед RapidFuzz
-CANDIDATES_LIMIT = 1000
-
-# Веса для комбинированного скора
-TITLE_WEIGHT = 0.8
-AUTHOR_WEIGHT = 0.2
 
 # Русские (и общие) стоп‑слова, которые не будем учитывать при поиске кандидатов
 STOPWORDS: Set[str] = {

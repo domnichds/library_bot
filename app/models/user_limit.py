@@ -13,6 +13,7 @@ class UserLimit(Base):
     date: Mapped[date] = mapped_column(Date, nullable=False)
     count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
+    # Обеспечиваем уникальность записи для каждого пользователя на каждую дату
     __table_args__ = (
         UniqueConstraint("user_id", "date", name="uq_user_daily_limit_user_date"),
     )
