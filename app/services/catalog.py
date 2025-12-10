@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from ..models.book import Book, Genre
 from ..models.db import async_session_factory
 
+
 async def get_all_genres() -> List[Genre]:
     """
     Возвращает все жанры отсортированные по имени.
@@ -17,11 +18,12 @@ async def get_all_genres() -> List[Genre]:
         )
         return list(result.scalars().all())
 
+
 async def get_books_page_by_genre(
-        genre_id: int,
-        page: int,
-        page_size: int = 10,
-    ) -> tuple[List[Book], int]:
+    genre_id: int,
+    page: int,
+    page_size: int = 10,
+) -> tuple[List[Book], int]:
     """
     Получает одну страницу списка книг для указанного жанра.
 
@@ -46,7 +48,7 @@ async def get_books_page_by_genre(
 
         if total_count == 0:
             return [], 0
-        
+
         total_pages = (total_count + page_size - 1) // page_size
         # Защита от выхода за диапазон
         page = max(1, min(page, total_pages))
@@ -63,4 +65,3 @@ async def get_books_page_by_genre(
         books = list(result.scalars().all())
 
         return books, total_pages
-    

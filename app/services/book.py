@@ -6,9 +6,10 @@ from ..models.book import Book, BookFile
 from ..models.db import async_session_factory
 
 from ..texts import (
-     BOOK_NAME,
-     BOOK_UNKNOWN_BOOK,
+    BOOK_NAME,
+    BOOK_UNKNOWN_BOOK,
 )
+
 
 async def get_book_files(book_id: int) -> list[BookFile]:
     """
@@ -20,12 +21,12 @@ async def get_book_files(book_id: int) -> list[BookFile]:
     Всегда возвращает список, который может быть пустым.
     """
     async with async_session_factory() as session:
-            result = await session.execute(
-                select(BookFile).
-                where(BookFile.book_id == book_id)
-            )
-            # scalars() извлекает именно объекты BookFile, а не сырые строки
-            book_files = list(result.scalars().all())
+        result = await session.execute(
+            select(BookFile).
+            where(BookFile.book_id == book_id)
+        )
+        # scalars() извлекает именно объекты BookFile, а не сырые строки
+        book_files = list(result.scalars().all())
     return book_files
 
 async def get_book_file_path(book_id: int, format_: str) -> Path | None:
@@ -39,8 +40,10 @@ async def get_book_file_path(book_id: int, format_: str) -> Path | None:
     async with async_session_factory() as session:
         result = await session.execute(
             select(BookFile).
-            where(BookFile.book_id == book_id,
-                  BookFile.format == format_)
+            where(
+                BookFile.book_id == book_id,
+                BookFile.format == format_,
+            )
         )
 
         book_file = result.scalar_one_or_none()

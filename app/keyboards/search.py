@@ -10,6 +10,7 @@ from ..texts import (
     KEYBOARD_AI_QA,
 )
 
+
 def books_search_keyboard(books: list[Book]) -> InlineKeyboardMarkup:
     """
     Клавиатура с результатами поиска.
@@ -48,6 +49,8 @@ async def search_format_keyboard(book_id: int) -> InlineKeyboardMarkup:
     - callback_data кнопок формата имеет вид:
         "download:{book_id}:format:{format}"
       и обрабатывается в on_download.
+    - Предпоследняя кнопка позволяет задать вопрос по книге нейросети:
+        "qa:search:{book_id}"
     - Внизу добавляется кнопка "Назад" для возврата к поиску:
         "back:search"
     """

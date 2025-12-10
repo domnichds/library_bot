@@ -12,6 +12,8 @@ from ..texts import (
     KEYBOARD_BOOK_NAME,
     KEYBOARD_AI_QA,
 )
+
+
 def genres_keyboard(genres: list[Genre]) -> InlineKeyboardMarkup:
     """
     Клавиатура со списком жанров.
@@ -33,7 +35,11 @@ def genres_keyboard(genres: list[Genre]) -> InlineKeyboardMarkup:
         )
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
-async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> InlineKeyboardMarkup:
+async def catalog_format_keyboard(
+    book_id: int,
+    genre_id: int,
+    page: int,
+) -> InlineKeyboardMarkup:
     """
     Клавиатура с форматами файлов для выбранной книги.
 
@@ -41,6 +47,8 @@ async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> Inl
     - callback_data кнопок формата имеет вид:
         "download:{book_id}:format:{format}"
       и обрабатывается в on_download.
+    - Предпоследняя кнопка позволяет задать вопрос по книге нейросети:
+        "qa:catalog:{book_id}:{genre_id}:{page}"
     - Внизу добавляется кнопка "Назад" для возврата к списку книг
       того же жанра и страницы:
         "genre:{genre_id}:page:{page}"
@@ -87,11 +95,11 @@ async def catalog_format_keyboard(book_id: int, genre_id: int, page: int) -> Inl
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 def books_catalog_keyboard(
-        books: list[Book],
-        genre_id: int,
-        page: int,
-        total_pages: int,
-    ) -> InlineKeyboardMarkup:
+    books: list[Book],
+    genre_id: int,
+    page: int,
+    total_pages: int,
+) -> InlineKeyboardMarkup:
     keyboard: list[list[InlineKeyboardButton]] = []
     """
     Клавиатура со списком книг конкретного жанра + элементы пагинации.
@@ -147,7 +155,6 @@ def books_catalog_keyboard(
     
     keyboard.append(nav_row)
 
-    # Добавляем кнопку "К жанрам"
     keyboard.append(
         [
             InlineKeyboardButton(
